@@ -4,7 +4,15 @@
   <div class="control-row">
     <div class="control no-margin">
       <label for="email">Email</label>
-      <input id="email" type="email" name="email" ngModel required email />
+      <input
+        id="email"
+        type="email"
+        name="email"
+        ngModel
+        required
+        email
+        #emailControl="ngModel"
+      />
     </div>
 
     <div class="control no-margin">
@@ -16,9 +24,16 @@
         ngModel
         required
         minlength="6"
+        #passwordControl="ngModel"
       />
     </div>
 
     <button class="button">Login</button>
   </div>
+  @if (emailControl.touched && passwordControl.touched && loginForm.form.invalid
+  ) {
+  <p class="control-error">
+    Inputs are invalid! Please check the email and password and try again.
+  </p>
+  }
 </form>
