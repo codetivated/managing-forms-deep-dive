@@ -1,5 +1,10 @@
 import { Component } from '@angular/core';
-import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -11,13 +16,27 @@ import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
 export class LoginComponent {
   loginForm = new FormGroup({
     // form controls will be defined here
-    email: new FormControl(''),
-    password: new FormControl(''),
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+    }),
+    password: new FormControl('', {
+      validators: [Validators.required, Validators.minLength(6)],
+    }),
   });
 
+  get emailIsInvalid() {
+    const emailControl = this.loginForm.get('email');
+    return emailControl?.touched && !emailControl?.valid;
+  }
+
+  get passwordIsInvalid() {
+    const passwordControl = this.loginForm.get('password');
+    return passwordControl?.touched && !passwordControl?.valid;
+  }
+
   onSubmit() {
-    const enteredEmail = this.loginForm.value.email;
-    const enteredPassword = this.loginForm.value.password;
+    const enteredEmail = this.loginForm.controls.email;
+    const enteredPassword = this.loginForm.controls.password;
     console.log(enteredEmail, enteredPassword);
   }
 }
