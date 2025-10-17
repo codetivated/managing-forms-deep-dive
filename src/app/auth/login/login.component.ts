@@ -6,12 +6,20 @@ import {
   Validators,
   AbstractControl,
 } from '@angular/forms';
+import { of } from 'rxjs';
 
 function mustContainQuestionMark(control: AbstractControl) {
   if (control.value && !control.value.includes('?')) {
     return { mustContainQuestionMark: true };
   }
   return null;
+}
+
+function emailIsUnique(control: AbstractControl) {
+  if (control.value !== 'test@example.com') {
+    return of(null);
+  }
+  return of({ notUnique: true });
 }
 
 @Component({
@@ -26,6 +34,7 @@ export class LoginComponent {
     // form controls will be defined here
     email: new FormControl('', {
       validators: [Validators.required, Validators.email],
+      asyncValidators: [emailIsUnique],
     }),
     password: new FormControl('', {
       validators: [
