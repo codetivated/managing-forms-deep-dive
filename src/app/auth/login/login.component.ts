@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   FormGroup,
   FormControl,
@@ -6,7 +6,7 @@ import {
   Validators,
   AbstractControl,
 } from '@angular/forms';
-import { of } from 'rxjs';
+import { debounceTime, of } from 'rxjs';
 
 function mustContainQuestionMark(control: AbstractControl) {
   if (control.value && !control.value.includes('?')) {
@@ -22,6 +22,16 @@ function emailIsUnique(control: AbstractControl) {
   return of({ notUnique: true });
 }
 
+//* Alternative way to set initial email value
+// in FormGroup declaration, uncomment below and set initialEmail in email FormControl
+
+// let initialEmail = '';
+// const savedForm = window.localStorage.getItem('savedLoginForm');
+// if (savedForm) {
+//   const parsedForm = JSON.parse(savedForm);
+//   initialEmail = parsedForm.email;
+// }
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -29,7 +39,8 @@ function emailIsUnique(control: AbstractControl) {
   styleUrl: './login.component.css',
   imports: [ReactiveFormsModule],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
   loginForm = new FormGroup({
     // form controls will be defined here
     email: new FormControl('', {
@@ -53,6 +64,32 @@ export class LoginComponent {
   get passwordIsInvalid() {
     const passwordControl = this.loginForm.get('password');
     return passwordControl?.touched && !passwordControl?.valid;
+  }
+
+  ngOnInit(): void {
+    const savedForm = window.localStorage.getItem('savedLoginForm');
+    if (savedForm) {
+      const savedEmail = JSON.parse(savedForm);
+      this.loginForm.patchValue({ email: savedEmail });
+    }
+
+    const subscription = this.loginForm.valueChanges
+      .pipe(debounceTime(500))
+      .subscribe({
+        next: (value) => {
+          const savedLoginForm = {
+            email: value.email,
+            password: value.password,
+          };
+          window.localStorage.setItem(
+            'savedLoginForm',
+            JSON.stringify(savedLoginForm.email)
+          );
+        },
+      });
+    this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe();
+    });
   }
 
   onSubmit() {
