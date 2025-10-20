@@ -1,5 +1,6 @@
 import { Component, inject, ElementRef } from '@angular/core';
 import {
+  FormArray,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -55,9 +56,11 @@ export class SignupComponent {
     >('student', {
       validators: [Validators.required],
     }),
-    acquisition: new FormControl<string[]>([], {
-      validators: [Validators.required],
-    }),
+    acquisition: new FormArray([
+      new FormControl(false),
+      new FormControl(false),
+      new FormControl(false),
+    ]),
     terms: new FormControl(false, {
       validators: [Validators.requiredTrue],
     }),
